@@ -40,6 +40,7 @@
         <p>{description}</p>
     </div>
     <footer>
+       <Button type="button" mode="outline" on:click={()=> dispatch('edit', id)}>Edit</Button>
        <Button href="mailto:{contactEmail}" >Contact</Button>
        <Button 
             type="button" 

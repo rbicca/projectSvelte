@@ -15,18 +15,26 @@
   });
 
   let editMode = null;
+  let editID;
   let page = 'overview';
 
   onDestroy(() => {
     destroy();
   });
 
-  const addMeetup = (event) => {
+  const savedMeetup = (event) => {
     editMode = null;
+    editID = null;
   }
+
+  const startEdit = (event) => {
+    editMode = 'edit';
+    editID = event.detail;
+  };
 
   const cancelEdit = ()=> {
     editMode = null;
+    editID = null;
   };
 
   const showDetails = (event) => {
@@ -40,13 +48,10 @@
 
 <main>
   {#if page === 'overview'}
-    <div class="meetup-controls">
-      <Button on:click={()=> editMode='add'}>New MeetUp</Button>
-    </div>
-    {#if editMode==='add' }
-      <MeetupEdit on:addedd={addMeetup} on:cancel={cancelEdit}/>
+    {#if editMode==='add' || editMode === 'edit'}
+      <MeetupEdit id={editID} on:addedd={savedMeetup} on:cancel={cancelEdit}/>
     {/if}
-    <MeetupGrid meetups={loadedMeetups} on:showDetails={showDetails}/>
+    <MeetupGrid meetups={loadedMeetups}  on:add={() => editMode='add'} on:showDetails={showDetails} on:edit={startEdit}/>
   {:else}
     <MeetupDetail id={pageID} on:close={() => page = 'overview'}/>
   {/if}
@@ -55,9 +60,5 @@
 <style>
   main {
     margin-top: 5rem;
-  }
-
-  .meetup-controls {
-    margin: 1 rem;
   }
 </style>

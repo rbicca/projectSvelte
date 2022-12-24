@@ -7,6 +7,8 @@
   import Modal from "../UI/Modal.svelte";
   import TextInput from "../UI/TextInput.svelte";
 
+  export let id = null;
+
   let title = ''; let titleValid = true;
   let subtitle = ''; let subtitleValid = true;
   let description = ''; let descriptionValid = true;
@@ -16,6 +18,19 @@
   let formIsValid = false;
  
   let dispatch = createEventDispatcher();
+
+  if(id){
+    let unscribeStore = customMeetupsStore.subscribe(items => {
+      const selectedMeetup = items.find(i => i.id === id);
+      title = selectedMeetup.title;
+      subtitle = selectedMeetup.subtitle;
+      description = selectedMeetup.description;
+      imageUrl = selectedMeetup.imageUrl;
+      address = selectedMeetup.address;
+      contactEmail = selectedMeetup.contactEmail;
+    });
+    unscribeStore();
+  }
 
   $: titleValid = !isEmpty(title);  
   $: subtitleValid = !isEmpty(subtitle);  
@@ -36,11 +51,19 @@
       isFavorite: false
     };
 
-    customMeetupsStore.addMeetup(meetupData);
-
+    if(id){
+      customMeetupsStore.updateMeetup(id, meetupData);
+    } else {
+      customMeetupsStore.addMeetup(meetupData);
+    }
     dispatch('addedd');
   };
 
+  const deleteMeetup = () => {
+    customMeetupsStore.removeMeetup(id);
+    dispatch('addedd');
+  };
+  
 </script>
 
 <Modal title="Meetup" on:cancel>
@@ -56,6 +79,9 @@
     <div slot="footer">
         <Button type="button" mode="outline" on:click={()=> dispatch('cancel')}>Cancel</Button>
         <Button type="button" on:click={mySubmit} disabled={!formIsValid}>Save</Button>
+        {#if id}
+          <Button type="button" on:click={deleteMeetup}>Delete</Button>
+        {/if}
     </div>
 </Modal>
 
