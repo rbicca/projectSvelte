@@ -3,6 +3,8 @@
     import MeetupFilter from "./MeetupFilter.svelte";
     import MeetupItem from "./MeetupItem.svelte";
     import { createEventDispatcher } from "svelte";
+    import { scale } from "svelte/transition";
+    import { flip } from "svelte/animate";
 
     export let meetups;
     
@@ -25,7 +27,9 @@
 
 <section id="meetups">
     {#each filteredMeetups as meetup, i (meetup.id)}
-        <MeetupItem {...meetup}  on:showDetails on:edit/>
+        <div transition:scale animate:flip={{duration:300}} >
+            <MeetupItem {...meetup}  on:showDetails on:edit/>
+        </div>
     {/each}
 </section>
 

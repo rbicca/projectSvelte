@@ -22,7 +22,7 @@
 </script>
 
 
-<article id={id}>
+<article id={id} >
     <header>
         <h1>
             {title}
