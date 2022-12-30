@@ -47,20 +47,79 @@
       description : description,
       imageUrl: imageUrl,
       address: address,
-      contactEmail: contactEmail,
-      isFavorite: false
+      contactEmail: contactEmail
     };
 
     if(id){
-      customMeetupsStore.updateMeetup(id, meetupData);
+      //console.log(JSON.stringify({...meetupData, id: id}));
+
+      //antes para  banco
+      fetch(`https://sk-max-svelte-default-rtdb.firebaseio.com/meetups/${id}.json`,{
+        method: 'PATCH',
+        body: JSON.stringify(meetupData),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => {
+        if(!res.ok){
+            throw new Error('Error updating on Firebase');
+          }
+          customMeetupsStore.updateMeetup(id, meetupData);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+
+      
     } else {
-      customMeetupsStore.addMeetup(meetupData);
+
+      //antes para o banco
+      fetch("https://sk-max-svelte-default-rtdb.firebaseio.com/meetups.json",{
+        method: 'POST',
+        body: JSON.stringify({...meetupData, isFavorite: false}),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => {
+          if(!res.ok){
+            throw new Error('Error inserting on Firebase');
+          }
+          //Toca a resposta para o próximo then
+          return res.json();
+        }
+      )
+      .then(data => {
+        console.log(data);
+
+        //depois para a store
+      customMeetupsStore.addMeetup({...meetupData, isFavorite: false, id: data.name});
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      ;
+
+      
     }
     dispatch('addedd');
   };
 
   const deleteMeetup = () => {
-    customMeetupsStore.removeMeetup(id);
+
+        //antes para  banco
+        fetch(`https://sk-max-svelte-default-rtdb.firebaseio.com/meetups/${id}.json`,{
+        method: 'DELETE'
+      })
+      .then(res => {
+        if(!res.ok){
+            throw new Error('Error deleting meetups on Firebase');
+          }
+          customMeetupsStore.removeMeetup(id);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    
     dispatch('addedd');
   };
   

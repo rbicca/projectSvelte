@@ -25,6 +25,10 @@
     <Button on:click={()=> dispatch('add')}>New MeetUp</Button>
 </section>
 
+{#if filteredMeetups.length ===0}
+    <p id="noMitas">No meetups found!</p>
+{/if}
+
 <section id="meetups">
     {#each filteredMeetups as meetup, i (meetup.id)}
         <div transition:scale animate:flip={{duration:300}} >
@@ -51,6 +55,10 @@
         #meetups {
             grid-template-columns: repeat(2, 1fr);
         }
+    }
+
+    #noMitas{
+        margin: 1rem;
     }
 
 </style>

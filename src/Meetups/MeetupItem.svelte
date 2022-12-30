@@ -3,6 +3,7 @@
     import customMeetupsStore from "./MeetupStore";
     import Button from "../UI/Button.svelte";
     import Badge from "../UI/Badge.svelte";
+  import LoadingSpinner from "../UI/LoadingSpinner.svelte";
 
     export let id;
     export let title;
@@ -13,10 +14,30 @@
     export let contactEmail;
     export let isFavorite;
 
+    let isLoading = false;
+
     const dispatch = createEventDispatcher();
 
     const toggleFavorite = () => {
-      customMeetupsStore.toggleFavorite(id);
+      isLoading = true;
+      //antes para  banco
+      fetch(`https://sk-max-svelte-default-rtdb.firebaseio.com/meetups/${id}.json`,{
+        method: 'PATCH',
+        body: JSON.stringify({isFavorite : !isFavorite}),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => {
+        isLoading = false;
+        if(!res.ok){
+            throw new Error('Error favoriting meetups on Firebase');
+          }
+          customMeetupsStore.toggleFavorite(id);
+      })
+      .catch(err => {
+        isLoading = false;
+        console.log(err);
+      });
+
     };
 
 </script>
@@ -42,13 +63,17 @@
     <footer>
        <Button type="button" mode="outline" on:click={()=> dispatch('edit', id)}>Edit</Button>
        <Button href="mailto:{contactEmail}" >Contact</Button>
-       <Button 
-            type="button" 
-            mode="outline" 
-            color={isFavorite ? null : 'success'}
-            on:click={toggleFavorite}
-        >{isFavorite ? 'unFavorite' : 'Favorite'}</Button>
-       <Button type= "button" on:click={() => dispatch('showDetails', id)}>Show Details</Button>
+       {#if isLoading}
+        <span id="aviso" ><LoadingSpinner /> </span>
+       {:else}
+        <Button 
+              type="button" 
+              mode="outline" 
+              color={isFavorite ? null : 'success'}
+              on:click={toggleFavorite}
+          >{isFavorite ? 'unFavorite' : 'Favorite'}</Button>
+        <Button type= "button" on:click={() => dispatch('showDetails', id)}>Show Details</Button>
+        {/if}
     </footer>
 </article>
 
@@ -110,5 +135,10 @@
 
     .content {
       height: 4rem;
+    }
+
+    #aviso{
+      max-height: 4rem;
+      zoom: 0.2;
     }
   </style>
